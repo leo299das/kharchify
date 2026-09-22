@@ -152,9 +152,9 @@
     </nav>
 
     <!-- Mobile Header -->
-    <header class="md:hidden bg-white/90 backdrop-blur-md px-5 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200">
-        <a href="{{ route('dashboard') }}" class="flex items-center">
-            <x-application-logo class="scale-90 origin-left" />
+    <header class="md:hidden bg-white/90 backdrop-blur-md px-4 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200">
+        <a href="{{ route('dashboard') }}" class="flex items-center shrink-0">
+            <x-application-logo size="small" />
         </a>
         <div class="flex items-center gap-2">
             @if(Auth::check() && Auth::user()->isAdmin())
