@@ -159,11 +159,6 @@
         </div>
 
         <div class="flex items-center gap-3 flex-wrap">
-            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-1.5 shadow-sm" title="Download Official Kharchify Android App (.apk)">
-                <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
-                <span>App (.apk)</span>
-            </a>
-
             @if(Auth::user()->isAdmin())
             <a href="{{ route('admin.dashboard') }}" class="px-4 py-2.5 rounded-xl text-xs font-black bg-slate-900 text-cyan-400 hover:bg-slate-800 border border-slate-700 transition flex items-center gap-1.5 shadow-md shadow-slate-900/20">
                 <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>

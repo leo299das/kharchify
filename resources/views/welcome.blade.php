@@ -136,6 +136,19 @@
         .btn-premium:active {
             transform: scale(0.98);
         }
+
+        /* Never show APK buttons on Desktop (PC) or inside installed APK */
+        @media (min-width: 768px) {
+            .apk-download-btn {
+                display: none !important;
+            }
+        }
+
+        @media all and (display-mode: standalone) {
+            .apk-download-btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="relative min-h-screen flex flex-col items-center px-4 py-4 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
@@ -153,10 +166,10 @@
         </a>
 
         <nav class="flex items-center gap-2 sm:gap-4 text-xs font-bold uppercase tracking-wider text-slate-600">
-            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 rounded-full font-bold text-[11px] sm:text-xs transition border border-emerald-200 shadow-sm">
+            <!-- APK button ONLY on mobile web (hidden on PC md+ and hidden inside installed APK) -->
+            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 rounded-full font-bold text-[11px] transition border border-emerald-200 shadow-sm">
                 <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
-                <span class="hidden sm:inline">Download</span>
-                <span>APK</span>
+                <span>App (.apk)</span>
             </a>
             @auth
                 <a href="{{ url('/dashboard') }}" class="px-5 py-2 sm:px-6 sm:py-2.5 bg-slate-950 text-white rounded-full text-xs font-black btn-premium shadow-md">Console →</a>
@@ -192,7 +205,8 @@
                     Get Started Free →
                 </a>
                 
-                <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="w-full sm:w-auto px-6 py-4 bg-slate-950 hover:bg-slate-900 text-white rounded-2xl font-bold text-sm sm:text-base transition shadow-lg inline-flex items-center justify-center gap-2">
+                <!-- APK Download button only for mobile web (hidden on desktop) -->
+                <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn md:hidden w-full sm:w-auto px-6 py-4 bg-slate-950 hover:bg-slate-900 text-white rounded-2xl font-bold text-sm sm:text-base transition shadow-lg inline-flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
                     <span>Download App (.apk)</span>
                 </a>
@@ -414,6 +428,11 @@
 
     <!-- Register Service Worker for PWA -->
     <script>
+        // If already running inside installed APK / Standalone app, hide all APK download prompts
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://')) {
+            document.querySelectorAll('.apk-download-btn').forEach(el => { el.style.display = 'none'; });
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
