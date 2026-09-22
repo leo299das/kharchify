@@ -1,9 +1,8 @@
-// Kharchify Service Worker v1.0.0
-const CACHE_NAME = 'kharchify-cache-v1';
+// Kharchify Service Worker v1.0.1
+const CACHE_NAME = 'kharchify-cache-v2';
 const OFFLINE_URL = '/offline.html';
 
 const ASSETS_TO_CACHE = [
-    '/',
     '/manifest.json',
     '/favicon.svg',
     '/images/logo-icon.svg',

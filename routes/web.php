@@ -14,6 +14,12 @@ use App\Http\Controllers\PlanController;
 */
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        if (!auth()->user()->plan) {
+            return redirect()->route('plans.show');
+        }
+        return redirect()->route('dashboard');
+    }
     return view('welcome');
 });
 
