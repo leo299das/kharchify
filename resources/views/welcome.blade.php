@@ -137,13 +137,7 @@
             transform: scale(0.98);
         }
 
-        /* Never show APK buttons on Desktop (PC) or inside installed APK */
-        @media (min-width: 768px) {
-            .apk-download-btn {
-                display: none !important;
-            }
-        }
-
+        /* Hide APK download prompts only when already inside standalone installed APK */
         @media all and (display-mode: standalone) {
             .apk-download-btn {
                 display: none !important;
@@ -166,10 +160,10 @@
         </a>
 
         <nav class="flex items-center gap-2 sm:gap-4 text-xs font-bold uppercase tracking-wider text-slate-600">
-            <!-- APK button ONLY on mobile web (hidden on PC md+ and hidden inside installed APK) -->
-            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 rounded-full font-bold text-[11px] transition border border-emerald-200 shadow-sm">
+            <!-- APK button visible on all devices -->
+            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-full font-black text-[11px] sm:text-xs transition border border-emerald-200 shadow-sm active:scale-95" title="Download Android APK">
                 <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
-                <span>App (.apk)</span>
+                <span>Download APK 🤖</span>
             </a>
             @auth
                 <a href="{{ url('/dashboard') }}" class="px-5 py-2 sm:px-6 sm:py-2.5 bg-slate-950 text-white rounded-full text-xs font-black btn-premium shadow-md">Console →</a>
@@ -201,13 +195,13 @@
             
             <!-- Hero CTAs -->
             <div class="reveal delay-3 pt-2 sm:pt-4 flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
-                <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm sm:text-base btn-premium shadow-lg shadow-indigo-600/25 flex items-center justify-center">
+                <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm sm:text-base btn-premium shadow-lg shadow-indigo-600/25 flex items-center justify-center">
                     Get Started Free →
                 </a>
                 
-                <!-- APK Download button only for mobile web (hidden on desktop) -->
-                <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn md:hidden w-full sm:w-auto px-6 py-4 bg-slate-950 hover:bg-slate-900 text-white rounded-2xl font-bold text-sm sm:text-base transition shadow-lg inline-flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
+                <!-- APK Download button for all devices -->
+                <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn w-full sm:w-auto px-7 py-4 bg-slate-950 hover:bg-slate-900 text-white rounded-2xl font-black text-sm sm:text-base transition shadow-lg shadow-slate-950/20 inline-flex items-center justify-center gap-2.5 border border-slate-800 hover:scale-[1.02] active:scale-98">
+                    <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
                     <span>Download App (.apk)</span>
                 </a>
                 
@@ -247,6 +241,39 @@
                 <p class="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
                     Set monthly target limits, track real-time pacing, and export official PDF & CSV statements in 1 click.
                 </p>
+            </div>
+        </section>
+
+        <!-- Android App Dedicated Showcase Banner -->
+        <section class="apk-download-btn bg-gradient-to-br from-emerald-950 via-slate-900 to-indigo-950 border border-emerald-500/30 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 lg:p-12 text-white shadow-2xl relative overflow-hidden text-left reveal">
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+                <div class="space-y-4 max-w-xl text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-black uppercase tracking-wider">
+                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
+                        <span>Official Android App</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                        Install Kharchify Directly On Your Android Phone
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                        Get 1-tap instant mobile access, fast offline logging, and smooth mobile experience. Download the official verified APK directly without needing Play Store.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-emerald-300 font-bold">
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 100% Free Download</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Fast 1-Click Install</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Secure & Lightweight</span>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row lg:flex-col items-center gap-3 w-full lg:w-auto shrink-0">
+                    <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm sm:text-base rounded-2xl transition shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-3 transform hover:scale-[1.03] active:scale-95">
+                        <svg class="w-6 h-6 text-slate-950 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
+                        <span>Download Kharchify.apk</span>
+                    </a>
+                    <span class="text-[11px] text-slate-400 font-medium">Direct APK File • Android 7.0+ (1.1 MB)</span>
+                </div>
             </div>
         </section>
 
@@ -406,9 +433,13 @@
                 <p class="text-slate-400 text-xs sm:text-sm md:text-base">
                     Join smart spenders who save more every month with Kharchify.
                 </p>
-                <div class="pt-2">
-                    <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm sm:text-base hover:bg-indigo-500 transition shadow-lg inline-block">
+                <div class="pt-2 flex flex-col sm:flex-row justify-center items-center gap-3">
+                    <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-sm sm:text-base transition shadow-lg inline-block">
                         Create Your Account Now →
+                    </a>
+                    <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn w-full sm:w-auto px-6 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-sm sm:text-base transition shadow-lg inline-flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5 text-white shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
+                        <span>Download APK 🤖</span>
                     </a>
                 </div>
             </div>
@@ -422,7 +453,11 @@
             <p class="text-slate-800 font-extrabold">© 2026 Kharchify • Smart Expense Tracker</p>
             <p class="text-[11px] text-slate-400 font-medium">Support: <a href="mailto:darakshaanhussain77@gmail.com" class="text-indigo-600 hover:underline">darakshaanhussain77@gmail.com</a> • WhatsApp: +91 92095 71683</p>
         </div>
-        <div class="flex flex-wrap justify-center gap-4 sm:gap-6 text-slate-600">
+        <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-slate-600">
+            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="apk-download-btn px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1 font-black text-[11px]">
+                <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
+                <span>Download APK</span>
+            </a>
             <a href="{{ route('terms') }}" class="hover:text-indigo-600 transition">Terms & Conditions</a>
             <a href="{{ route('privacy') }}" class="hover:text-indigo-600 transition">Privacy Policy</a>
             <a href="{{ route('contact') }}" class="hover:text-indigo-600 transition">Contact Support</a>

@@ -270,6 +270,14 @@
             @endif
             @endauth
 
+            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="flex items-center gap-3 p-3 rounded-2xl text-xs font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition border border-emerald-200">
+                <span class="text-lg">🤖</span>
+                <div>
+                    <span class="block">Download Android APK (.apk)</span>
+                    <span class="text-[10px] text-emerald-600 font-normal">Install app directly on phone</span>
+                </div>
+            </a>
+
             <a href="{{ route('contact') }}" class="flex items-center gap-3 p-3 rounded-2xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition">
                 <span>💬</span>
                 <span>Help & Contact Support</span>
@@ -337,6 +345,9 @@
         </a>
         <a href="{{ route('splits.index') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
             <span>👥 Splitwise & Group Bills</span>
+        </a>
+        <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="flex items-center gap-2 px-4 py-2.5 text-xs font-black text-emerald-700 hover:bg-emerald-50 transition">
+            <span>🤖 Download Android APK</span>
         </a>
         <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
             <span>👤 My Profile & Settings</span>

@@ -16,6 +16,8 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Kharchify');
+        $response->assertSee('downloads/Kharchify.apk');
+        $response->assertSee('Download APK');
     }
 
     public function test_authenticated_user_with_plan_is_redirected_to_dashboard_from_root(): void
