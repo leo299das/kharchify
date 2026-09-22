@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Kharchify') }}</title>
@@ -24,6 +24,13 @@
         <script src="https://cdn.tailwindcss.com"></script>
 
         <style>
+            html, body {
+                width: 100%;
+                max-width: 100vw;
+                overflow-x: hidden;
+                touch-action: manipulation;
+                -webkit-text-size-adjust: 100%;
+            }
             body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
             /* Modern Animated Background */
             .guest-bg {
