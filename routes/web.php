@@ -36,7 +36,7 @@ Route::post('/contact', function (\Illuminate\Http\Request $request) {
         'message' => 'required|string|max:2000',
     ]);
 
-    return back()->with('success', 'Thank you! Your message has been received. Our team will review and reply directly to ' . $request->input('email') . ' shortly (you can also email us directly at darakshaanhussain@gmail.com).');
+    return back()->with('success', 'Thank you! Your message has been received. Our team will review and reply directly to ' . $request->input('email') . ' shortly (you can also email us directly at darakshaanhussain77@gmail.com).');
 })->name('contact.send');
 
 

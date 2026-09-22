@@ -420,7 +420,7 @@
     <footer class="mt-16 sm:mt-24 w-full max-w-6xl border-t border-slate-200 py-10 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-bold text-slate-500">
         <div class="flex flex-col items-center md:items-start gap-1 text-center md:text-left">
             <p class="text-slate-800 font-extrabold">© 2026 Kharchify • Smart Expense Tracker</p>
-            <p class="text-[11px] text-slate-400 font-medium">Support: <a href="mailto:darakshaanhussain@gmail.com" class="text-indigo-600 hover:underline">darakshaanhussain@gmail.com</a> • WhatsApp: +91 92095 71683</p>
+            <p class="text-[11px] text-slate-400 font-medium">Support: <a href="mailto:darakshaanhussain77@gmail.com" class="text-indigo-600 hover:underline">darakshaanhussain77@gmail.com</a> • WhatsApp: +91 92095 71683</p>
         </div>
         <div class="flex flex-wrap justify-center gap-4 sm:gap-6 text-slate-600">
             <a href="{{ route('terms') }}" class="hover:text-indigo-600 transition">Terms & Conditions</a>

@@ -137,7 +137,7 @@
                     6. Your Data Rights & Deletion
                 </h2>
                 <p>
-                    You have complete control over your data. You may edit or delete individual expense entries anytime. If you wish to delete your entire account, you can do so directly with 1-click in your Profile Settings or by emailing <a href="mailto:darakshaanhussain@gmail.com" class="text-indigo-600 font-semibold underline">darakshaanhussain@gmail.com</a>. All your data will be permanently wiped.
+                    You have complete control over your data. You may edit or delete individual expense entries anytime. If you wish to delete your entire account, you can do so directly with 1-click in your Profile Settings or by emailing <a href="mailto:darakshaanhussain77@gmail.com" class="text-indigo-600 font-semibold underline">darakshaanhussain77@gmail.com</a>. All your data will be permanently wiped.
                 </p>
             </section>
 
@@ -152,10 +152,10 @@
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <p class="text-xs font-bold text-slate-800">Kharchify Privacy Team</p>
-                        <p class="text-xs text-indigo-600 font-semibold mt-0.5">darakshaanhussain@gmail.com</p>
+                        <p class="text-xs text-indigo-600 font-semibold mt-0.5">darakshaanhussain77@gmail.com</p>
                         <p class="text-[11px] text-slate-400 mt-0.5">WhatsApp: +91 92095 71683</p>
                     </div>
-                    <a href="mailto:darakshaanhussain@gmail.com" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black transition">
+                    <a href="mailto:darakshaanhussain77@gmail.com" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black transition">
                         Contact Privacy Team →
                     </a>
                 </div>

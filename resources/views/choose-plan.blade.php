@@ -249,7 +249,7 @@
 
     <!-- Bottom Help & Legal Navigation -->
     <div class="mt-8 mb-16 py-6 border-t border-slate-200/80 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs font-bold text-slate-400">
-        <p>© 2026 Kharchify • Direct Assistance: <a href="mailto:darakshaanhussain@gmail.com" class="text-indigo-600 hover:underline">darakshaanhussain@gmail.com</a></p>
+        <p>© 2026 Kharchify • Direct Assistance: <a href="mailto:darakshaanhussain77@gmail.com" class="text-indigo-600 hover:underline">darakshaanhussain77@gmail.com</a></p>
         <div class="flex items-center gap-5">
             <a href="{{ route('contact') }}" class="text-indigo-600 hover:underline">Contact Support</a>
             <a href="{{ route('terms') }}" class="hover:text-slate-600 transition">Terms of Service</a>

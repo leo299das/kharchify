@@ -128,12 +128,12 @@
                     
                     <div class="mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
                         <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Direct Inbox</p>
-                        <p class="text-xs font-black text-indigo-600 break-all select-all mt-0.5">darakshaanhussain@gmail.com</p>
+                        <p class="text-xs font-black text-indigo-600 break-all select-all mt-0.5">darakshaanhussain77@gmail.com</p>
                     </div>
                 </div>
 
                 <div class="mt-6 flex flex-col gap-2">
-                    <a href="mailto:darakshaanhussain@gmail.com?subject=Kharchify%20Support%20Inquiry" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs text-center shadow-md shadow-indigo-600/20 active:scale-95 transition">
+                    <a href="mailto:darakshaanhussain77@gmail.com?subject=Kharchify%20Support%20Inquiry" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs text-center shadow-md shadow-indigo-600/20 active:scale-95 transition">
                         Open Mail App →
                     </a>
                     <button type="button" onclick="copyEmail()" id="copyBtn" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs text-center active:scale-95 transition flex items-center justify-center gap-1.5">
@@ -247,7 +247,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </button>
                         <p class="text-[11px] text-slate-400 text-center mt-2.5">
-                            You can also email us directly at <a href="mailto:darakshaanhussain@gmail.com" class="text-indigo-600 font-bold underline">darakshaanhussain@gmail.com</a>
+                            You can also email us directly at <a href="mailto:darakshaanhussain77@gmail.com" class="text-indigo-600 font-bold underline">darakshaanhussain77@gmail.com</a>
                         </p>
                     </div>
                 </form>
@@ -274,7 +274,7 @@
 
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
                             <p class="font-black text-slate-900">Can I request complete account deletion?</p>
-                            <p class="text-slate-500 mt-1">Yes. You can delete your account and all expense history with one click in your Profile Settings or by emailing darakshaanhussain@gmail.com.</p>
+                            <p class="text-slate-500 mt-1">Yes. You can delete your account and all expense history with one click in your Profile Settings or by emailing darakshaanhussain77@gmail.com.</p>
                         </div>
                     </div>
                 </div>
@@ -313,7 +313,7 @@
     <!-- Copy to Clipboard Script -->
     <script>
         function copyEmail() {
-            const email = "darakshaanhussain@gmail.com";
+            const email = "darakshaanhussain77@gmail.com";
             navigator.clipboard.writeText(email).then(() => {
                 const copyText = document.getElementById("copyText");
                 const copyBtn = document.getElementById("copyBtn");

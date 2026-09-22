@@ -12,7 +12,7 @@ class LegalPagesTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Terms & Conditions', false);
-        $response->assertSee('darakshaanhussain@gmail.com');
+        $response->assertSee('darakshaanhussain77@gmail.com');
         $response->assertSee('+91 92095 71683');
     }
 
@@ -22,7 +22,7 @@ class LegalPagesTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Privacy Policy');
-        $response->assertSee('darakshaanhussain@gmail.com');
+        $response->assertSee('darakshaanhussain77@gmail.com');
     }
 
     public function test_contact_page_loads_successfully(): void
@@ -31,7 +31,7 @@ class LegalPagesTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Contact Us');
-        $response->assertSee('darakshaanhussain@gmail.com');
+        $response->assertSee('darakshaanhussain77@gmail.com');
         $response->assertSee('+91 92095 71683');
     }
 
