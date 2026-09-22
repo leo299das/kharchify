@@ -112,7 +112,11 @@
             <x-application-logo size="large" />
         </a>
 
-        <nav class="flex items-center gap-4 sm:gap-8 text-xs font-bold uppercase tracking-wider text-slate-600">
+        <nav class="flex items-center gap-3 sm:gap-6 text-xs font-bold uppercase tracking-wider text-slate-600">
+            <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-full font-bold text-xs transition border border-emerald-200 shadow-sm">
+                <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
+                <span>App (.apk)</span>
+            </a>
             @auth
                 <a href="{{ url('/dashboard') }}" class="px-7 py-3 bg-slate-950 text-white rounded-full btn-premium shadow-lg">Console →</a>
             @else
@@ -139,11 +143,15 @@
                 Kharchify gives you crystal-clear control over your daily spending, monthly budgets, category trends, and PDF financial statements.
             </p>
             <div class="reveal delay-3 pt-4 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="{{ route('register') }}" class="px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg btn-premium shadow-xl shadow-indigo-600/30">
+                <a href="{{ route('register') }}" class="w-full sm:w-auto px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg btn-premium shadow-xl shadow-indigo-600/30">
                     Get Started Free →
                 </a>
-                <a href="#plans" class="px-8 py-5 bg-white text-slate-800 rounded-2xl font-bold text-base border border-slate-200 hover:bg-slate-50 transition shadow-sm">
-                    View Pricing (From ₹49)
+                <a href="{{ asset('downloads/Kharchify.apk') }}" download="Kharchify.apk" class="w-full sm:w-auto px-8 py-5 bg-slate-950 hover:bg-slate-900 text-white rounded-2xl font-bold text-base transition shadow-xl inline-flex items-center justify-center gap-2.5">
+                    <svg class="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1568-.2716.064-.6185-.2076-.7753-.2715-.1567-.6184-.064-.7752.2076l-2.0232 3.5042c-1.4423-.658-3.056-1.0264-4.7965-1.0264s-3.3542.3684-4.7965 1.0264L5.2533 5.3006c-.1568-.2716-.5037-.3643-.7752-.2076-.2716.1568-.3644.5037-.2076.7753l1.996 3.4572C2.7093 11.2338.2577 15.269.0002 20.0002h23.9996c-.2575-4.7312-2.7091-8.7664-6.1183-10.6788"/></svg>
+                    <span>Download App (.apk)</span>
+                </a>
+                <a href="#plans" class="w-full sm:w-auto px-8 py-5 bg-white text-slate-800 rounded-2xl font-bold text-base border border-slate-200 hover:bg-slate-50 transition shadow-sm">
+                    Pricing (From ₹49)
                 </a>
             </div>
         </section>
