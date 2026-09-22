@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 80" fill="none" class="kharchify-logo">
+    <defs>
+        <!-- Gradients -->
+        <linearGradient id="logo-grad-left" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#047857" />
+            <stop offset="100%" stop-color="#059669" />
+        </linearGradient>
+
+        <linearGradient id="logo-grad-mid" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#059669" />
+            <stop offset="100%" stop-color="#10b981" />
+        </linearGradient>
+
+        <linearGradient id="logo-grad-arrow" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0d9488" />
+            <stop offset="50%" stop-color="#10b981" />
+            <stop offset="100%" stop-color="#34d399" />
+        </linearGradient>
+
+        <linearGradient id="logo-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#065f46" />
+            <stop offset="100%" stop-color="#022c22" />
+        </linearGradient>
+
+        <filter id="logo-glow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#10b981" flood-opacity="0.25"/>
+        </filter>
+    </defs>
+
+    <!-- 1. ICON MARK -->
+    <g transform="translate(6, 4)" filter="url(#logo-glow)">
+        <!-- Left Parallelogram Bar -->
+        <path d="M 6 64 L 23 64 L 38 34 L 21 34 Z" fill="url(#logo-grad-left)" />
+
+        <!-- Middle Main Slope Body -->
+        <path d="M 27 64 L 44 64 L 68 18 L 51 18 Z" fill="url(#logo-grad-mid)" />
+
+        <!-- Bottom Dark Emerald Triangle Facet -->
+        <path d="M 48 64 L 70 64 L 59 44 Z" fill="url(#logo-grad-dark)" />
+
+        <!-- Rising Arrow Head -->
+        <path d="M 41 28 L 76 28 L 68 4 Z" fill="url(#logo-grad-arrow)" />
+        
+        <!-- Arrow Body Connection Highlight -->
+        <path d="M 37 44 L 54 44 L 66 22 L 49 22 Z" fill="url(#logo-grad-arrow)" opacity="0.95" />
+    </g>
+
+    <!-- 2. WORDMARK TYPOGRAPHY "KHARCHIFY" -->
+    <text x="96" y="52" 
+          fill="#1e293b" 
+          font-family="'Plus Jakarta Sans', 'Inter', 'Montserrat', -apple-system, sans-serif" 
+          font-weight="900" 
+          font-size="36" 
+          letter-spacing="2.5"
+          style="text-transform: uppercase;">
+        KHARCHIFY
+    </text>
+</svg>

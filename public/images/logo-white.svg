@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 80" fill="none" class="kharchify-logo-white">
+    <defs>
+        <linearGradient id="logo-w-grad-left" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#059669" />
+            <stop offset="100%" stop-color="#10b981" />
+        </linearGradient>
+
+        <linearGradient id="logo-w-grad-mid" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#10b981" />
+            <stop offset="100%" stop-color="#34d399" />
+        </linearGradient>
+
+        <linearGradient id="logo-w-grad-arrow" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#34d399" />
+            <stop offset="100%" stop-color="#6ee7b7" />
+        </linearGradient>
+
+        <linearGradient id="logo-w-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#047857" />
+            <stop offset="100%" stop-color="#064e3b" />
+        </linearGradient>
+
+        <filter id="logo-w-glow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#34d399" flood-opacity="0.4"/>
+        </filter>
+    </defs>
+
+    <!-- ICON MARK -->
+    <g transform="translate(6, 4)" filter="url(#logo-w-glow)">
+        <path d="M 6 64 L 23 64 L 38 34 L 21 34 Z" fill="url(#logo-w-grad-left)" />
+        <path d="M 27 64 L 44 64 L 68 18 L 51 18 Z" fill="url(#logo-w-grad-mid)" />
+        <path d="M 48 64 L 70 64 L 59 44 Z" fill="url(#logo-w-grad-dark)" />
+        <path d="M 41 28 L 76 28 L 68 4 Z" fill="url(#logo-w-grad-arrow)" />
+        <path d="M 37 44 L 54 44 L 66 22 L 49 22 Z" fill="url(#logo-w-grad-arrow)" opacity="0.95" />
+    </g>
+
+    <!-- WORDMARK TYPOGRAPHY "KHARCHIFY" -->
+    <text x="96" y="52" 
+          fill="#ffffff" 
+          font-family="'Plus Jakarta Sans', 'Inter', 'Montserrat', -apple-system, sans-serif" 
+          font-weight="900" 
+          font-size="36" 
+          letter-spacing="2.5"
+          style="text-transform: uppercase;">
+        KHARCHIFY
+    </text>
+</svg>
