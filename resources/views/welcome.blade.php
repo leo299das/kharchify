@@ -417,12 +417,17 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-16 sm:mt-24 w-full max-w-6xl border-t border-slate-200 py-8 flex flex-col sm:flex-row justify-between items-center text-xs font-bold text-slate-400 gap-4">
-        <p>© 2026 Kharchify • All Rights Reserved</p>
-        <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
-            <a href="#plans" class="hover:text-indigo-600 transition">Plans (Free / ₹49 / ₹94 / ₹150)</a>
+    <footer class="mt-16 sm:mt-24 w-full max-w-6xl border-t border-slate-200 py-10 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-bold text-slate-500">
+        <div class="flex flex-col items-center md:items-start gap-1 text-center md:text-left">
+            <p class="text-slate-800 font-extrabold">© 2026 Kharchify • Smart Expense Tracker</p>
+            <p class="text-[11px] text-slate-400 font-medium">Support: <a href="mailto:darakshaanhussain@gmail.com" class="text-indigo-600 hover:underline">darakshaanhussain@gmail.com</a> • WhatsApp: +91 92095 71683</p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-4 sm:gap-6 text-slate-600">
+            <a href="{{ route('terms') }}" class="hover:text-indigo-600 transition">Terms & Conditions</a>
+            <a href="{{ route('privacy') }}" class="hover:text-indigo-600 transition">Privacy Policy</a>
+            <a href="{{ route('contact') }}" class="hover:text-indigo-600 transition">Contact Support</a>
+            <a href="#plans" class="hover:text-indigo-600 transition">Pricing Plans</a>
             <a href="{{ route('login') }}" class="hover:text-indigo-600 transition">Sign In</a>
-            <a href="{{ route('register') }}" class="hover:text-indigo-600 transition">Register</a>
         </div>
     </footer>
 

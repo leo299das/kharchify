@@ -66,8 +66,17 @@
                 {{ $slot }}
             </div>
 
-            <div class="mt-8 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-                Secure & Smart Expense Tracking
+            <div class="mt-8 flex flex-col items-center gap-2">
+                <div class="flex items-center gap-4 text-xs font-bold text-slate-500">
+                    <a href="{{ route('terms') }}" class="hover:text-indigo-600 transition">Terms</a>
+                    <span>•</span>
+                    <a href="{{ route('privacy') }}" class="hover:text-indigo-600 transition">Privacy</a>
+                    <span>•</span>
+                    <a href="{{ route('contact') }}" class="hover:text-indigo-600 transition">Contact Us</a>
+                </div>
+                <div class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">
+                    Secure & Smart Expense Tracking
+                </div>
             </div>
         </div>
 

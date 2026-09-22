@@ -171,6 +171,12 @@
         <a href="{{ route('plans.show') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
             <span>💳 Manage Plan / Upgrade</span>
         </a>
+        <a href="{{ route('contact') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
+            <span>💬 Help & Contact Support</span>
+        </a>
+        <a href="{{ route('terms') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
+            <span>📜 Terms & Privacy</span>
+        </a>
 
         <hr class="my-1 border-slate-100">
 

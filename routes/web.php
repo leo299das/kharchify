@@ -17,6 +17,29 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+/*
+|--------------------------------------------------------------------------
+| LEGAL & PUBLIC SUPPORT ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::view('/terms', 'legal.terms')->name('terms');
+Route::view('/privacy', 'legal.privacy')->name('privacy');
+Route::get('/contact', function () {
+    return view('legal.contact');
+})->name('contact');
+
+Route::post('/contact', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'name' => 'required|string|max:100',
+        'email' => 'required|email|max:150',
+        'subject' => 'nullable|string|max:150',
+        'message' => 'required|string|max:2000',
+    ]);
+
+    return back()->with('success', 'Thank you! Your message has been received. Our team will review and reply directly to ' . $request->input('email') . ' shortly (you can also email us directly at darakshaanhussain@gmail.com).');
+})->name('contact.send');
+
+
 
 Route::middleware('auth')->group(function () {
 
