@@ -41,12 +41,7 @@ class SplitController extends Controller
      */
     public function createGroup()
     {
-        $user = Auth::user();
-        $registeredUsers = User::where('id', '!=', $user->id)->select('id', 'name', 'email')->take(10)->get();
-
-        return view('splits.create-group', [
-            'registeredUsers' => $registeredUsers,
-        ]);
+        return view('splits.create-group');
     }
 
     /**

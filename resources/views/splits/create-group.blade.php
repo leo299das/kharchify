@@ -140,21 +140,6 @@
                 </span>
             </div>
 
-            @if(!empty($registeredUsers) && $registeredUsers->isNotEmpty())
-            <!-- Quick Chips for Registered Users -->
-            <div class="space-y-1.5">
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Quick Add Registered Friends:</p>
-                <div class="flex flex-wrap gap-2">
-                    @foreach($registeredUsers as $reg)
-                    <button type="button" onclick="addRegisteredFriend('{{ addslashes($reg->name) }}', '{{ addslashes($reg->email) }}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-slate-200 text-xs font-bold text-slate-700 transition flex items-center gap-1.5">
-                        <span>+ {{ $reg->name }}</span>
-                        <span class="text-[10px] text-slate-400 font-normal">({{ $reg->email }})</span>
-                    </button>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
             <!-- Dynamic Member Rows Container -->
             <div id="membersContainer" class="space-y-3">
                 
@@ -235,21 +220,6 @@
         `;
         container.appendChild(div);
         memberCount++;
-    }
-
-    function addRegisteredFriend(name, email) {
-        // Find first empty row or append new one
-        const rows = document.querySelectorAll('.member-row');
-        for (let row of rows) {
-            const nameInput = row.querySelector('input[name*="[name]"]');
-            const emailInput = row.querySelector('input[name*="[email]"]');
-            if (nameInput && !nameInput.value.trim()) {
-                nameInput.value = name;
-                if (emailInput) emailInput.value = email;
-                return;
-            }
-        }
-        addMemberRow(name, email);
     }
 
     function removeMemberRow(button) {
