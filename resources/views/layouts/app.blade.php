@@ -111,40 +111,14 @@
                     @endif
                 </a>
 
-                <div class="relative group">
-                    <button onclick="toggleMenu()" class="flex items-center space-x-2.5 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-2xl transition">
+                <div class="relative">
+                    <button onclick="toggleMenu(event)" class="flex items-center space-x-2.5 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-2xl transition">
                         <div class="w-7 h-7 bg-indigo-600 rounded-full flex items-center justify-center text-[11px] text-white font-black shadow-inner">
                             {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
                         </div>
                         <span class="text-xs font-bold text-slate-800">{{ Auth::user()->name ?? 'User' }}</span>
                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    
-                    <div id="profileMenu" class="hidden opacity-0 scale-95 absolute right-0 mt-3 w-56 bg-white border border-slate-200 rounded-[1.5rem] shadow-2xl py-2 z-50">
-                        <div class="px-4 py-3 border-b border-slate-100">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Signed in as</p>
-                            <p class="text-xs font-bold text-slate-800 truncate">{{ Auth::user()->email }}</p>
-                        </div>
-                        @if(Auth::user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-xs font-black text-cyan-600 bg-cyan-50/50 hover:bg-cyan-100/60 transition">
-                            ⚡ Admin Control Panel
-                        </a>
-                        <hr class="my-1 border-slate-100">
-                        @endif
-                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
-                            👤 My Profile & Settings
-                        </a>
-                        <a href="{{ route('plans.show') }}" class="block px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
-                            💳 Manage Plan / Upgrade
-                        </a>
-                        <hr class="my-1 border-slate-100">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full text-left px-4 py-2.5 text-xs font-black text-rose-600 hover:bg-rose-50 transition">
-                                🚪 Log Out
-                            </button>
-                        </form>
-                    </div>
                 </div>
                 @endauth
             </div>
@@ -152,7 +126,7 @@
     </nav>
 
     <!-- Mobile Header -->
-    <header class="md:hidden bg-white/90 backdrop-blur-md px-4 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200">
+    <header class="md:hidden bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200">
         <a href="{{ route('dashboard') }}" class="flex items-center shrink-0">
             <x-application-logo size="small" />
         </a>
@@ -165,11 +139,58 @@
             <a href="{{ route('plans.show') }}" class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">
                 Plans
             </a>
-            <button onclick="toggleMenu()" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 active:scale-95 transition">
+            <button onclick="toggleMenu(event)" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 active:scale-95 transition border border-slate-200" title="Profile Menu">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
             </button>
         </div>
     </header>
+
+    <!-- Unified Floating Profile Dropdown (Works on Both Mobile & Desktop) -->
+    @auth
+    <div id="profileMenu" class="hidden fixed top-14 right-3 sm:right-6 md:right-10 w-64 bg-white border border-slate-200 rounded-3xl shadow-2xl py-2 z-[100] transition-all duration-200">
+        <div class="px-4 py-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center shadow-inner shrink-0">
+                    {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs font-black text-slate-900 truncate">{{ Auth::user()->name }}</p>
+                    <p class="text-[10px] text-slate-400 truncate">{{ Auth::user()->email }}</p>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black 
+                    {{ Auth::user()->plan === 'pro' ? 'bg-amber-100 text-amber-900' : (Auth::user()->plan === 'medium' ? 'bg-emerald-100 text-emerald-900' : (Auth::user()->plan === 'free' ? 'bg-emerald-50 text-emerald-800' : 'bg-indigo-50 text-indigo-700')) }}">
+                    Plan: {{ strtoupper(Auth::user()->plan ?? 'FREE') }}
+                </span>
+            </div>
+        </div>
+
+        @if(Auth::user()->isAdmin())
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-black text-cyan-600 bg-cyan-50/60 hover:bg-cyan-100 transition">
+            <span>⚡ Admin Control Panel</span>
+        </a>
+        <hr class="my-1 border-slate-100">
+        @endif
+
+        <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
+            <span>👤 My Profile & Settings</span>
+        </a>
+        <a href="{{ route('plans.show') }}" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
+            <span>💳 Manage Plan / Upgrade</span>
+        </a>
+
+        <hr class="my-1 border-slate-100">
+
+        <!-- LOG OUT -->
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2.5 text-xs font-black text-rose-600 hover:bg-rose-50 transition">
+                <span>🚪 Log Out</span>
+            </button>
+        </form>
+    </div>
+    @endauth
 
     <!-- Success Toast Notification -->
     @if(session('success'))
@@ -230,13 +251,13 @@
     </div>
 
     <script>
-        function toggleMenu() {
+        function toggleMenu(e) {
+            if (e) {
+                e.stopPropagation();
+            }
             const menu = document.getElementById("profileMenu");
             if (!menu) return;
             menu.classList.toggle("hidden");
-            setTimeout(() => {
-                menu.classList.toggle("active");
-            }, 10);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -253,11 +274,10 @@
         });
 
         window.addEventListener('click', (e) => {
-            if (!e.target.closest('.relative') && !e.target.closest('header')) {
-                const menu = document.getElementById("profileMenu");
-                if (menu && menu.classList.contains("active")) {
-                    menu.classList.remove("active");
-                    setTimeout(() => menu.classList.add("hidden"), 180);
+            const menu = document.getElementById("profileMenu");
+            if (menu && !menu.classList.contains("hidden")) {
+                if (!menu.contains(e.target) && !e.target.closest('button[onclick*="toggleMenu"]')) {
+                    menu.classList.add("hidden");
                 }
             }
         });
