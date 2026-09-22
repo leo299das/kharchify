@@ -43,15 +43,7 @@
         }
 
         #profileMenu {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: top right;
-            pointer-events: none;
-        }
-        #profileMenu.active {
-            display: block !important;
-            transform: scale(1);
-            opacity: 1;
-            pointer-events: auto;
+            pointer-events: auto !important;
         }
 
         ::-webkit-scrollbar { width: 6px; }
