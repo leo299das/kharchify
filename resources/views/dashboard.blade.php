@@ -4,7 +4,10 @@
 
 @php
     use App\Models\Expense;
+    use App\Models\Income;
     use App\Models\User;
+    use App\Models\SplitGroup;
+    use App\Services\SplitBalanceService;
     use Illuminate\Support\Facades\DB;
     use Carbon\Carbon;
 
@@ -18,21 +21,42 @@
 
     $monthlyBudget = $user->monthly_budget ?? 25000.00;
 
-    // Spending Metrics
-    $totalSpent = Expense::where('user_id', $userId)->sum('amount');
-    $todaySpent = Expense::where('user_id', $userId)->whereDate('expense_date', Carbon::today())->sum('amount');
+    // Splitwise / Shared Balances Summary
+    $splitService = app(SplitBalanceService::class);
+    $splitSummary = $splitService->getUserOverallSummary($user);
+
+    // Income & Earning Metrics (Cash Flow Inflow)
+    $totalIncome = (float) Income::where('user_id', $userId)->sum('amount');
+    $todayIncome = (float) Income::where('user_id', $userId)->whereDate('income_date', Carbon::today())->sum('amount');
+    $thisMonthIncome = (float) Income::where('user_id', $userId)
+        ->whereMonth('income_date', Carbon::now()->month)
+        ->whereYear('income_date', Carbon::now()->year)
+        ->sum('amount');
+    $thisMonthIncomeCount = Income::where('user_id', $userId)
+        ->whereMonth('income_date', Carbon::now()->month)
+        ->whereYear('income_date', Carbon::now()->year)
+        ->count();
+
+    // Spending Metrics (Cash Flow Outflow)
+    $totalSpent = (float) Expense::where('user_id', $userId)->sum('amount');
+    $todaySpent = (float) Expense::where('user_id', $userId)->whereDate('expense_date', Carbon::today())->sum('amount');
     
     $thisMonthExpenses = Expense::where('user_id', $userId)
         ->whereMonth('expense_date', Carbon::now()->month)
         ->whereYear('expense_date', Carbon::now()->year);
     
-    $thisMonthSpent = (clone $thisMonthExpenses)->sum('amount');
+    $thisMonthSpent = (float) (clone $thisMonthExpenses)->sum('amount');
     $thisMonthCount = (clone $thisMonthExpenses)->count();
     
-    $lastMonthSpent = Expense::where('user_id', $userId)
+    $lastMonthSpent = (float) Expense::where('user_id', $userId)
         ->whereMonth('expense_date', Carbon::now()->subMonth()->month)
         ->whereYear('expense_date', Carbon::now()->subMonth()->year)
         ->sum('amount');
+
+    // Net Savings & Cash Flow
+    $thisMonthNetSavings = $thisMonthIncome - $thisMonthSpent;
+    $allTimeNetSavings = $totalIncome - $totalSpent;
+    $savingsRate = $thisMonthIncome > 0 ? round(($thisMonthNetSavings / $thisMonthIncome) * 100, 1) : 0;
 
     // Budget Calculation
     $budgetPercentage = $monthlyBudget > 0 ? min(round(($thisMonthSpent / $monthlyBudget) * 100, 1), 100) : 0;
@@ -55,19 +79,43 @@
     // Highest single transaction this month
     $highestExpense = (clone $thisMonthExpenses)->orderByDesc('amount')->first();
 
-    // Monthly Trend Chart Data (Database-agnostic)
+    // Recent 5 Incomes
+    $recentIncomes = Income::with('category')
+        ->where('user_id', $userId)
+        ->orderBy('income_date', 'desc')
+        ->orderBy('id', 'desc')
+        ->take(5)
+        ->get();
+
+    // Monthly Trend Chart Data (Income vs Expense over past 6 months)
     $pastUserExpenses = Expense::where('user_id', $userId)
-        ->where('expense_date', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+        ->where('expense_date', '>=', Carbon::now()->subMonths(5)->startOfMonth())
         ->orderBy('expense_date', 'asc')
         ->get();
 
-    $monthlyData = $pastUserExpenses->groupBy(function ($expense) {
-        return Carbon::parse($expense->expense_date)->format('Y-m');
-    })->map(function ($items, $key) {
-        $date = Carbon::parse($key . '-01');
+    $pastUserIncomes = Income::where('user_id', $userId)
+        ->where('income_date', '>=', Carbon::now()->subMonths(5)->startOfMonth())
+        ->orderBy('income_date', 'asc')
+        ->get();
+
+    $monthKeys = collect();
+    for ($i = 5; $i >= 0; $i--) {
+        $monthKeys->push(Carbon::now()->subMonths($i)->format('Y-m'));
+    }
+
+    $monthlyData = $monthKeys->map(function ($ym) use ($pastUserExpenses, $pastUserIncomes) {
+        $date = Carbon::parse($ym . '-01');
+        $expSum = $pastUserExpenses->filter(function ($e) use ($ym) {
+            return Carbon::parse($e->expense_date)->format('Y-m') === $ym;
+        })->sum('amount');
+        $incSum = $pastUserIncomes->filter(function ($inc) use ($ym) {
+            return Carbon::parse($inc->income_date)->format('Y-m') === $ym;
+        })->sum('amount');
+
         return (object) [
             'month' => $date->format('M'),
-            'total' => $items->sum('amount'),
+            'expense' => (float) $expSum,
+            'income' => (float) $incSum,
         ];
     })->values();
 
@@ -171,19 +219,19 @@
             </a>
 
             @if($canPdf)
-            <a href="{{ route('expenses.pdf') }}" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                <span>Download PDF</span>
-            </a>
-            @else
-            <a href="{{ route('plans.show') }}" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-500 hover:text-indigo-600 border border-slate-200 transition flex items-center gap-1.5" title="Unlock Formatted PDF Statements with Basic Plan (₹49)">
-                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                <span>PDF (Basic ₹49+)</span>
+            <a href="{{ route('expenses.pdf') }}" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 shadow-sm transition flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <span>Export PDF</span>
             </a>
             @endif
 
+            <a href="{{ route('incomes.create') }}" class="px-5 py-2.5 rounded-xl text-xs font-black bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                <span>Add Earning 💰</span>
+            </a>
+
             <a href="{{ route('expenses.create') }}" class="px-5 py-2.5 rounded-xl text-xs font-black bg-slate-900 text-white hover:bg-indigo-600 shadow-lg shadow-slate-900/10 transition flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                 <span>Add Expense</span>
             </a>
         </div>
@@ -194,7 +242,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
             <div>
                 <div class="flex items-center gap-2">
-                    <h3 class="text-lg font-black text-slate-900">Monthly Budget Progress</h3>
+                    <h3 class="text-lg font-black text-slate-900">Monthly Expense Budget Target</h3>
                     @if($isOverBudget)
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-red-100 text-red-700">🚨 Over Budget</span>
                     @elseif($budgetPercentage >= 80)
@@ -204,7 +252,7 @@
                     @endif
                 </div>
                 <p class="text-slate-500 text-xs mt-0.5">
-                    Month of {{ Carbon::now()->format('F Y') }} • Spent ₹{{ number_format($thisMonthSpent) }} of ₹{{ number_format($monthlyBudget) }} target
+                    Spent ₹{{ number_format($thisMonthSpent) }} of ₹{{ number_format($monthlyBudget) }} target
                 </p>
             </div>
 
@@ -217,7 +265,7 @@
                            class="w-full pl-7 pr-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50"
                            placeholder="Set Budget">
                 </div>
-                <button type="submit" class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition shrink-0">
+                <button type="submit" class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition shrink-0 cursor-pointer">
                     Update Goal
                 </button>
             </form>
@@ -236,7 +284,7 @@
                 @if($isOverBudget)
                     <span class="text-red-600 font-extrabold">+₹{{ number_format($thisMonthSpent - $monthlyBudget) }} over limit</span>
                 @else
-                    <span class="text-emerald-600">₹{{ number_format($remainingBudget) }} remaining</span>
+                    <span class="text-emerald-600">₹{{ number_format($remainingBudget) }} remaining in budget</span>
                 @endif
             </span>
         </div>
@@ -245,55 +293,52 @@
     <!-- 4 Main KPI Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
-        <!-- Total Spent -->
-        <div class="stat-card p-5 sm:p-6 rounded-[2rem]">
+        <!-- Total Earnings Inflow -->
+        <div class="stat-card p-5 sm:p-6 rounded-[2rem] bg-gradient-to-br from-white to-emerald-50/40 border border-emerald-100/80">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total All-Time</span>
-                <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Total Earnings</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                    💰
+                </div>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-emerald-600 count-up" data-value="{{ $totalIncome }}">₹0</h2>
+            <p class="text-[11px] text-emerald-700/80 font-semibold mt-1">This month: +₹{{ number_format($thisMonthIncome) }}</p>
+        </div>
+
+        <!-- Total Spent Outflow -->
+        <div class="stat-card p-5 sm:p-6 rounded-[2rem] bg-gradient-to-br from-white to-rose-50/30 border border-rose-100/80">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Spent</span>
+                <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs">
+                    💸
                 </div>
             </div>
             <h2 class="text-2xl sm:text-3xl font-black text-slate-900 count-up" data-value="{{ $totalSpent }}">₹0</h2>
-            <p class="text-[11px] text-slate-400 font-medium mt-1">Cumulative records</p>
+            <p class="text-[11px] text-slate-400 font-semibold mt-1">This month: -₹{{ number_format($thisMonthSpent) }}</p>
         </div>
 
-        <!-- This Month -->
-        <div class="stat-card p-5 sm:p-6 rounded-[2rem] bg-white border border-indigo-100/90 shadow-sm relative">
+        <!-- Net Cash Flow / Savings -->
+        <div class="stat-card p-5 sm:p-6 rounded-[2rem] bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-100/80">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                    This Month
-                </span>
-                <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider">Net Cash Flow</span>
+                <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                    💎
                 </div>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 count-up" data-value="{{ $thisMonthSpent }}">₹0</h2>
-            <p class="text-[11px] text-slate-400 font-medium mt-1">{{ $thisMonthCount }} entries this month</p>
+            <h2 class="text-2xl sm:text-3xl font-black {{ $allTimeNetSavings >= 0 ? 'text-indigo-600' : 'text-rose-600' }} count-up" data-value="{{ abs($allTimeNetSavings) }}">{{ $allTimeNetSavings >= 0 ? '+₹' : '-₹' }}0</h2>
+            <p class="text-[11px] text-indigo-700/80 font-semibold mt-1">{{ $thisMonthNetSavings >= 0 ? 'Month: +₹' . number_format($thisMonthNetSavings) : 'Month: -₹' . number_format(abs($thisMonthNetSavings)) }} ({{ $savingsRate }}%)</p>
         </div>
 
-        <!-- Today -->
-        <div class="stat-card p-5 sm:p-6 rounded-[2rem]">
+        <!-- Daily Average Spending -->
+        <div class="stat-card p-5 sm:p-6 rounded-[2rem] bg-gradient-to-br from-white to-amber-50/30 border border-amber-100/80">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Today</span>
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 count-up" data-value="{{ $todaySpent }}">₹0</h2>
-            <p class="text-[11px] text-slate-400 font-medium mt-1">Logged today</p>
-        </div>
-
-        <!-- Daily Average -->
-        <div class="stat-card p-5 sm:p-6 rounded-[2rem]">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daily Avg</span>
-                <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">Daily Avg Spend</span>
+                <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">
+                    📊
                 </div>
             </div>
             <h2 class="text-2xl sm:text-3xl font-black text-slate-900 count-up" data-value="{{ $dailyAverage }}">₹0</h2>
-            <p class="text-[11px] text-slate-400 font-medium mt-1">Per day (past {{ $daysPassed }} days)</p>
+            <p class="text-[11px] text-amber-800/80 font-semibold mt-1">Past {{ $daysPassed }} days</p>
         </div>
 
     </div>
@@ -305,7 +350,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
             </div>
             <div>
-                <p class="text-xs font-bold text-slate-400 uppercase">Top Category This Month</p>
+                <p class="text-xs font-bold text-slate-400 uppercase">Top Expense Category</p>
                 <h4 class="font-black text-slate-800 text-sm mt-0.5">
                     {{ $topCategory->category->name ?? 'No entries yet' }}
                 </h4>
@@ -335,16 +380,125 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <div>
-                <p class="text-xs font-bold text-slate-400 uppercase">Financial Health Score</p>
+                <p class="text-xs font-bold text-slate-400 uppercase">Net Financial Health</p>
                 <h4 class="font-black text-slate-800 text-sm mt-0.5">
-                    @if($isOverBudget) 52 / 100 (Needs Attention)
-                    @elseif($budgetPercentage >= 80) 74 / 100 (Moderate)
-                    @else 94 / 100 (Excellent)
+                    @if($thisMonthNetSavings > 0)
+                        💚 Positive Inflow (+{{ $savingsRate }}%)
+                    @elseif($thisMonthNetSavings < 0)
+                        🚨 Negative Cash Flow
+                    @else
+                        ⚖️ Neutral / Balanced
                     @endif
                 </h4>
-                <p class="text-xs text-emerald-600 font-bold">Based on budget pacing</p>
+                <p class="text-xs text-emerald-600 font-bold">{{ $thisMonthIncomeCount }} earnings vs {{ $thisMonthCount }} expenses</p>
             </div>
         </div>
+    </div>
+
+    <!-- Kharchify Split & Settle (Splitwise Shared Balances) Widget -->
+    <div class="stagger-card bg-gradient-to-br from-white via-indigo-50/20 to-white p-6 sm:p-8 rounded-[2rem] border border-indigo-100 shadow-md">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-600/20">
+                    👥
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-black text-slate-900 tracking-tight text-lg sm:text-xl">Split & Settle Balances</h3>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-800">Splitwise Engine</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Rent, group trips, couple costs, dinners & IOUs</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <a href="{{ route('splits.groups.create') }}" class="px-4 py-2 bg-slate-900 text-white hover:bg-indigo-600 font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span>New Group</span>
+                </a>
+                <a href="{{ route('splits.index') }}" class="px-4 py-2 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+                    <span>Open Split Hub →</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Split Metric Chips -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">You Are Owed</p>
+                    <p class="text-xl font-black text-emerald-600 mt-0.5">+₹{{ number_format($splitSummary['total_owed_to_user'], 2) }}</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                    ↓
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">You Owe</p>
+                    <p class="text-xl font-black text-rose-600 mt-0.5">-₹{{ number_format($splitSummary['total_user_owes'], 2) }}</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs">
+                    ↑
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Overall Net</p>
+                    <p class="text-xl font-black {{ $splitSummary['overall_net'] >= 0 ? 'text-indigo-600' : 'text-rose-600' }} mt-0.5">
+                        {{ $splitSummary['overall_net'] >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($splitSummary['overall_net']), 2) }}
+                    </p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                    ⚖️
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Groups Mini List -->
+        @if(empty($splitSummary['groups']))
+        <div class="p-6 text-center bg-white/80 rounded-2xl border border-dashed border-indigo-200">
+            <p class="text-sm font-bold text-slate-700">No active split groups yet</p>
+            <p class="text-xs text-slate-400 mt-0.5 max-w-md mx-auto">Create a group for your roommates, Goa trip, dinner split, or wedding party to simplify debts automatically.</p>
+            <a href="{{ route('splits.groups.create') }}" class="inline-flex items-center gap-1.5 mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">
+                <span>+ Create Your First Split Group</span>
+            </a>
+        </div>
+        @else
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            @foreach(array_slice($splitSummary['groups'], 0, 3) as $item)
+            @php
+                $g = $item['group'];
+                $net = $item['net_balance'];
+                $status = $item['status'];
+            @endphp
+            <a href="{{ route('splits.show', $g->id) }}" class="p-4 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200/80 transition flex flex-col justify-between group">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-2xl">{{ $g->icon }}</span>
+                        <div>
+                            <h5 class="font-black text-slate-900 text-sm group-hover:text-indigo-600 transition">{{ $g->name }}</h5>
+                            <p class="text-[11px] text-slate-400 font-medium">{{ $g->members->count() }} members • {{ ucfirst($g->type) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-400 font-medium">Your status:</span>
+                    @if($status === 'owed')
+                        <span class="font-black text-emerald-600">+₹{{ number_format($net, 2) }}</span>
+                    @elseif($status === 'owes')
+                        <span class="font-black text-rose-600">-₹{{ number_format(abs($net), 2) }}</span>
+                    @else
+                        <span class="font-bold text-slate-500">Settled up ✓</span>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+        @endif
     </div>
 
     <!-- Visual Analytics Charts (Unlocked on Medium & Pro) -->
@@ -354,25 +508,25 @@
         <div class="bg-white p-6 rounded-[2rem] border border-slate-200/80 shadow-md">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h3 class="font-bold text-slate-900 tracking-tight text-base sm:text-lg">Monthly Trends</h3>
-                    <p class="text-xs text-slate-400">Spending history over last 6 months</p>
+                    <h3 class="font-bold text-slate-900 tracking-tight text-base sm:text-lg">Monthly Cash Flow Comparison</h3>
+                    <p class="text-xs text-slate-400">Income (+₹) vs Expenses (-₹) over 6 months</p>
                 </div>
-                <span class="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase">Visual</span>
+                <span class="bg-emerald-50 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase">Income vs Expense</span>
             </div>
-            <div class="relative h-[240px]">
-                <canvas id="lineChart"></canvas>
+            <div class="relative h-[250px]">
+                <canvas id="cashflowChart"></canvas>
             </div>
         </div>
 
         <div class="bg-white p-6 rounded-[2rem] border border-slate-200/80 shadow-md">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h3 class="font-bold text-slate-900 tracking-tight text-base sm:text-lg">Category Split</h3>
-                    <p class="text-xs text-slate-400">Current month distribution</p>
+                    <h3 class="font-bold text-slate-900 tracking-tight text-base sm:text-lg">Expense Category Split</h3>
+                    <p class="text-xs text-slate-400">Current month spending distribution</p>
                 </div>
-                <span class="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase">Analysis</span>
+                <span class="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase">Categories</span>
             </div>
-            <div class="relative h-[240px] flex justify-center">
+            <div class="relative h-[250px] flex justify-center">
                 <canvas id="pieChart"></canvas>
             </div>
         </div>
@@ -387,7 +541,7 @@
             </div>
             <h3 class="text-2xl font-black text-white">Visual Analytics, Charts & PDF Exports Launching Soon!</h3>
             <p class="text-indigo-200 text-sm mt-1 max-w-xl">
-                We are actively preparing our <strong>Basic (₹49)</strong>, <strong>Medium (₹94)</strong>, and <strong>Full Features (₹150)</strong> plans with interactive graphs, budget pacing meters, and formatted PDF statements.
+                We are actively preparing our <strong>Basic (₹49)</strong>, <strong>Medium (₹94)</strong>, and <strong>Full Features (₹150)</strong> plans with interactive Income vs Expense comparison graphs, budget pacing meters, and formatted PDF statements.
             </p>
         </div>
         <a href="{{ route('plans.show') }}" class="px-6 py-3.5 bg-amber-400 text-slate-950 font-black rounded-2xl text-sm hover:bg-amber-300 transition shrink-0 shadow-lg flex items-center gap-2">
@@ -396,49 +550,121 @@
     </div>
     @endif
 
-    <!-- Recent Transactions -->
-    <div class="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200/80 shadow-md">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h3 class="font-bold text-slate-900 tracking-tight text-base sm:text-lg">Recent Transactions</h3>
-                <p class="text-xs text-slate-400">Latest expenses logged</p>
-            </div>
-            <a href="{{ route('expenses.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
-                View All Expenses →
-            </a>
-        </div>
+    <!-- Dual Activity Section: Recent Incomes & Recent Expenses Side-by-Side -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        @if($recentExpenses->isEmpty())
-        <div class="py-12 text-center text-slate-400">
-            <p class="font-medium">No expenses logged yet.</p>
-            <a href="{{ route('expenses.create') }}" class="inline-block mt-3 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs">
-                + Add Your First Expense
-            </a>
-        </div>
-        @else
-        <div class="divide-y divide-slate-100">
-            @foreach($recentExpenses as $exp)
-            <div class="py-3.5 flex items-center justify-between hover:bg-slate-50/60 px-2 rounded-xl transition">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm shrink-0">
-                        {{ substr($exp->category->name ?? 'U', 0, 1) }}
+        <!-- Recent Earnings / Inflow -->
+        <div class="bg-white p-6 sm:p-7 rounded-[2rem] border border-emerald-100 shadow-md">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                        💰
                     </div>
                     <div>
-                        <h5 class="font-bold text-slate-900 text-sm">{{ $exp->paid_to }}</h5>
-                        <p class="text-[11px] text-slate-400 font-medium">
-                            <span class="text-indigo-600 font-semibold">{{ $exp->category->name ?? 'General' }}</span> • 
-                            {{ Carbon::parse($exp->expense_date)->format('d M, Y') }} • 
-                            {{ $exp->payment_method }}
-                        </p>
+                        <h3 class="font-black text-slate-900 tracking-tight text-base">Recent Earnings</h3>
+                        <p class="text-[11px] text-slate-400">Money coming in</p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <span class="font-black text-rose-600 text-sm sm:text-base">-₹{{ number_format($exp->amount, 2) }}</span>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('incomes.create') }}" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl font-bold text-xs transition">
+                        + Add Inflow
+                    </a>
+                    <a href="{{ route('incomes.index') }}" class="text-xs font-bold text-emerald-700 hover:text-emerald-900 transition">
+                        All →
+                    </a>
                 </div>
             </div>
-            @endforeach
+
+            @if($recentIncomes->isEmpty())
+            <div class="py-10 text-center text-slate-400">
+                <span class="text-3xl">💰</span>
+                <p class="font-medium text-xs mt-2 text-slate-500">No income or earnings logged yet.</p>
+                <a href="{{ route('incomes.create') }}" class="inline-block mt-3 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-bold text-xs hover:bg-emerald-100 transition">
+                    + Log Your First Earning
+                </a>
+            </div>
+            @else
+            <div class="divide-y divide-slate-100">
+                @foreach($recentIncomes as $inc)
+                <div class="py-3 flex items-center justify-between hover:bg-emerald-50/30 px-2 rounded-xl transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-base shrink-0">
+                            {{ $inc->category->icon ?? '💰' }}
+                        </div>
+                        <div class="min-w-0">
+                            <h5 class="font-bold text-slate-900 text-xs sm:text-sm truncate">{{ $inc->source }}</h5>
+                            <p class="text-[11px] text-slate-400 font-medium truncate">
+                                <span class="text-emerald-600 font-semibold">{{ $inc->category->name ?? 'Income' }}</span> • 
+                                {{ $inc->income_date ? Carbon::parse($inc->income_date)->format('d M') : '' }} • 
+                                {{ $inc->payment_method }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0 ml-2">
+                        <span class="font-black text-emerald-600 text-sm sm:text-base">+₹{{ number_format($inc->amount, 2) }}</span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
-        @endif
+
+        <!-- Recent Expenses / Outflow -->
+        <div class="bg-white p-6 sm:p-7 rounded-[2rem] border border-slate-200/80 shadow-md">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-sm">
+                        💸
+                    </div>
+                    <div>
+                        <h3 class="font-black text-slate-900 tracking-tight text-base">Recent Expenses</h3>
+                        <p class="text-[11px] text-slate-400">Money going out</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('expenses.create') }}" class="px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-bold text-xs transition">
+                        + Add Expense
+                    </a>
+                    <a href="{{ route('expenses.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
+                        All →
+                    </a>
+                </div>
+            </div>
+
+            @if($recentExpenses->isEmpty())
+            <div class="py-10 text-center text-slate-400">
+                <span class="text-3xl">💸</span>
+                <p class="font-medium text-xs mt-2 text-slate-500">No expenses logged yet.</p>
+                <a href="{{ route('expenses.create') }}" class="inline-block mt-3 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs">
+                    + Add Your First Expense
+                </a>
+            </div>
+            @else
+            <div class="divide-y divide-slate-100">
+                @foreach($recentExpenses as $exp)
+                <div class="py-3 flex items-center justify-between hover:bg-slate-50 px-2 rounded-xl transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
+                            {{ substr($exp->category->name ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="min-w-0">
+                            <h5 class="font-bold text-slate-900 text-xs sm:text-sm truncate">{{ $exp->paid_to }}</h5>
+                            <p class="text-[11px] text-slate-400 font-medium truncate">
+                                <span class="text-indigo-600 font-semibold">{{ $exp->category->name ?? 'General' }}</span> • 
+                                {{ Carbon::parse($exp->expense_date)->format('d M') }} • 
+                                {{ $exp->payment_method }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0 ml-2">
+                        <span class="font-black text-rose-600 text-sm sm:text-base">-₹{{ number_format($exp->amount, 2) }}</span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+        </div>
+
     </div>
 
 </div>
@@ -449,7 +675,7 @@
     const monthly = @json($monthlyData);
     const categories = @json($categoryData);
 
-    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.family = "'Plus Jakarta Sans', 'Inter', sans-serif";
     Chart.defaults.color = '#94a3b8';
 
     /* Count-up animation for stat numbers */
@@ -467,39 +693,67 @@
         requestAnimationFrame(tick);
     });
 
-    /* LINE CHART WITH GRADIENT */
-    const lineCanvas = document.getElementById('lineChart');
-    if (lineCanvas) {
-        const ctx = lineCanvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.30)');
-        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+    /* CASH FLOW COMPARISON BAR / LINE CHART (INCOME VS EXPENSE) */
+    const cashflowCanvas = document.getElementById('cashflowChart');
+    if (cashflowCanvas) {
+        const ctx = cashflowCanvas.getContext('2d');
 
         new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: monthly.length ? monthly.map(m => m.month) : ['No Data'],
-                datasets: [{
-                    label: 'Expenses',
-                    data: monthly.length ? monthly.map(m => m.total) : [0],
-                    borderColor: '#4f46e5',
-                    borderWidth: 3,
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.35,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#4f46e5',
-                    pointBorderWidth: 2
-                }]
+                datasets: [
+                    {
+                        label: 'Earnings (+₹)',
+                        data: monthly.length ? monthly.map(m => m.income) : [0],
+                        backgroundColor: '#10b981',
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.6
+                    },
+                    {
+                        label: 'Expenses (-₹)',
+                        data: monthly.length ? monthly.map(m => m.expense) : [0],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.6
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: { duration: 800, easing: 'easeOutCubic' },
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            padding: 12,
+                            font: { size: 11, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ₹' + Number(context.raw).toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                },
                 scales: {
-                    y: { grid: { color: '#f1f5f9' }, border: { dash: [4, 4] } },
+                    y: {
+                        grid: { color: '#f1f5f9' },
+                        border: { dash: [4, 4] },
+                        ticks: {
+                            callback: function(val) { return '₹' + Number(val).toLocaleString('en-IN'); }
+                        }
+                    },
                     x: { grid: { display: false } }
                 }
             }

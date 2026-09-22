@@ -239,6 +239,52 @@ class User extends Authenticatable
         return $this->hasMany(Category::class);
     }
 
+    public function incomes()
+    {
+        return $this->hasMany(Income::class);
+    }
+
+    public function incomeCategories()
+    {
+        return $this->hasMany(IncomeCategory::class);
+    }
+
+    public function totalIncome(): float
+    {
+        return (float) $this->incomes()->sum('amount');
+    }
+
+    public function totalExpense(): float
+    {
+        return (float) $this->expenses()->sum('amount');
+    }
+
+    public function thisMonthIncome(): float
+    {
+        return (float) $this->incomes()
+            ->whereMonth('income_date', now()->month)
+            ->whereYear('income_date', now()->year)
+            ->sum('amount');
+    }
+
+    public function thisMonthExpense(): float
+    {
+        return (float) $this->expenses()
+            ->whereMonth('expense_date', now()->month)
+            ->whereYear('expense_date', now()->year)
+            ->sum('amount');
+    }
+
+    public function thisMonthNetSavings(): float
+    {
+        return round($this->thisMonthIncome() - $this->thisMonthExpense(), 2);
+    }
+
+    public function allTimeNetSavings(): float
+    {
+        return round($this->totalIncome() - $this->totalExpense(), 2);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

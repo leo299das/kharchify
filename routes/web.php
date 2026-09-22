@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\SplitController;
+use App\Http\Controllers\IncomeController;
 
 
 /*
@@ -123,6 +125,37 @@ Route::middleware('auth')->group(function () {
     Route::delete('/expenses/{id}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('/expenses/pdf', [ExpenseController::class, 'downloadPDF'])->name('expenses.pdf');
     Route::get('/expenses/export-csv', [ExpenseController::class, 'exportCsv'])->name('expenses.export-csv');
+
+    /*
+    |--------------------------------------------------------------------------
+    | INCOMES & EARNINGS (CASH FLOW INFLOW)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/incomes', [IncomeController::class, 'index'])->name('incomes.index');
+    Route::get('/incomes/create', [IncomeController::class, 'create'])->name('incomes.create');
+    Route::post('/incomes', [IncomeController::class, 'store'])->name('incomes.store');
+    Route::get('/incomes/{id}/edit', [IncomeController::class, 'edit'])->name('incomes.edit');
+    Route::put('/incomes/{id}', [IncomeController::class, 'update'])->name('incomes.update');
+    Route::delete('/incomes/{id}', [IncomeController::class, 'destroy'])->name('incomes.destroy');
+
+    /*
+    |--------------------------------------------------------------------------
+    | SPLITWISE / SHARED GROUP EXPENSES
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/splits', [SplitController::class, 'index'])->name('splits.index');
+    Route::get('/splits/groups/create', [SplitController::class, 'createGroup'])->name('splits.groups.create');
+    Route::post('/splits/groups', [SplitController::class, 'storeGroup'])->name('splits.groups.store');
+    Route::get('/splits/join/{code}', [SplitController::class, 'joinByCode'])->name('splits.join');
+    Route::post('/splits/join', [SplitController::class, 'joinGroup'])->name('splits.join.store');
+    Route::get('/splits/groups/{id}', [SplitController::class, 'show'])->name('splits.show');
+    Route::post('/splits/groups/{id}/members', [SplitController::class, 'addMember'])->name('splits.groups.members.store');
+    Route::post('/splits/groups/{id}/expenses', [SplitController::class, 'storeExpense'])->name('splits.expenses.store');
+    Route::delete('/splits/groups/{id}/expenses/{expenseId}', [SplitController::class, 'destroyExpense'])->name('splits.expenses.destroy');
+    Route::post('/splits/groups/{id}/settlements', [SplitController::class, 'storeSettlement'])->name('splits.settlements.store');
+    Route::delete('/splits/groups/{id}/settlements/{settlementId}', [SplitController::class, 'destroySettlement'])->name('splits.settlements.destroy');
+    Route::get('/splits/groups/{id}/whatsapp', [SplitController::class, 'shareWhatsApp'])->name('splits.groups.whatsapp');
+    Route::delete('/splits/groups/{id}', [SplitController::class, 'destroyGroup'])->name('splits.groups.destroy');
 
     /*
     |--------------------------------------------------------------------------
