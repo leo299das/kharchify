@@ -1,12 +1,10 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "org.dpdns.kharchify.twa",
-      "sha256_cert_fingerprints": [
-        "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
-      ]
-    }
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "org.dpdns.kharchify.www.twa",
+    "sha256_cert_fingerprints": [
+      "63:8A:7F:02:FA:96:03:1B:99:3C:F5:5C:DF:E3:3E:72:C5:88:21:26:1C:DF:65:A6:CD:DC:CD:FE:0B:02:15:20"
+    ]
   }
-]
+}]
