@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Expense;
+use App\Models\Income;
 use App\Models\Category;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -225,45 +226,196 @@ class ExpenseController extends Controller
         }
 
         $userId = $user->id;
+        $statementType = $request->get('statement_type', 'all'); // 'all', 'expenses', 'incomes'
+        $preset = $request->get('preset');
+        $startDate = null;
+        $endDate = null;
+        $dateRangeText = 'All-Time Statement';
+        $filenameSuffix = 'all-time';
 
-        $query = Expense::with('category')->where('user_id', $userId);
+        // 1. Resolve date range from preset, month, or custom start/end dates
+        if ($preset) {
+            switch ($preset) {
+                case 'this_month':
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    $dateRangeText = Carbon::now()->format('F Y');
+                    $filenameSuffix = Carbon::now()->format('Y-m');
+                    break;
+                case 'last_month':
+                    $startDate = Carbon::now()->subMonth()->startOfMonth();
+                    $endDate = Carbon::now()->subMonth()->endOfMonth();
+                    $dateRangeText = Carbon::now()->subMonth()->format('F Y');
+                    $filenameSuffix = Carbon::now()->subMonth()->format('Y-m');
+                    break;
+                case 'last_3_months':
+                    $startDate = Carbon::now()->subMonths(2)->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    $dateRangeText = Carbon::now()->subMonths(2)->format('M Y') . ' to ' . Carbon::now()->format('M Y');
+                    $filenameSuffix = 'last-3-months';
+                    break;
+                case 'last_6_months':
+                    $startDate = Carbon::now()->subMonths(5)->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    $dateRangeText = Carbon::now()->subMonths(5)->format('M Y') . ' to ' . Carbon::now()->format('M Y');
+                    $filenameSuffix = 'last-6-months';
+                    break;
+                case 'this_year':
+                    $startDate = Carbon::now()->startOfYear();
+                    $endDate = Carbon::now()->endOfYear();
+                    $dateRangeText = Carbon::now()->format('Y') . ' (Year-to-Date)';
+                    $filenameSuffix = 'year-' . Carbon::now()->format('Y');
+                    break;
+                case 'all_time':
+                default:
+                    $startDate = null;
+                    $endDate = null;
+                    $dateRangeText = 'All-Time Statement';
+                    $filenameSuffix = 'all-time';
+                    break;
+            }
+        } elseif ($request->filled('month')) {
+            try {
+                $monthDate = Carbon::createFromFormat('Y-m', $request->month);
+                $startDate = $monthDate->copy()->startOfMonth();
+                $endDate = $monthDate->copy()->endOfMonth();
+                $dateRangeText = $monthDate->format('F Y');
+                $filenameSuffix = $request->month;
+            } catch (\Exception $e) {
+                $startDate = null;
+                $endDate = null;
+                $dateRangeText = 'All-Time Statement';
+                $filenameSuffix = 'all-time';
+            }
+        } elseif ($request->filled('start_date') || $request->filled('end_date')) {
+            $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
+            $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
 
-        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
-
-        if ($startDate && $endDate) {
-            $query->whereBetween('expense_date', [$startDate, $endDate]);
-            $dateRangeText = $startDate->format('d M Y') . ' to ' . $endDate->format('d M Y');
-        } else {
-            $dateRangeText = 'All-Time Statement';
+            if ($startDate && $endDate) {
+                $dateRangeText = $startDate->format('d M Y') . ' to ' . $endDate->format('d M Y');
+                $filenameSuffix = $startDate->format('Ymd') . '-to-' . $endDate->format('Ymd');
+            } elseif ($startDate) {
+                $dateRangeText = 'From ' . $startDate->format('d M Y');
+                $filenameSuffix = 'from-' . $startDate->format('Ymd');
+            } elseif ($endDate) {
+                $dateRangeText = 'Up to ' . $endDate->format('d M Y');
+                $filenameSuffix = 'upto-' . $endDate->format('Ymd');
+            }
         }
 
-        $expenses = $query->orderBy('expense_date', 'desc')->get();
+        // 2. Query Expenses
+        $expenses = collect();
+        if ($statementType !== 'incomes') {
+            $expenseQuery = Expense::with('category')->where('user_id', $userId);
 
+            if ($startDate && $endDate) {
+                $expenseQuery->whereBetween('expense_date', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $expenseQuery->where('expense_date', '>=', $startDate);
+            } elseif ($endDate) {
+                $expenseQuery->where('expense_date', '<=', $endDate);
+            }
+
+            if ($request->filled('category_id')) {
+                $expenseQuery->where('category_id', $request->category_id);
+            }
+
+            $expenses = $expenseQuery->orderBy('expense_date', 'desc')->get();
+        }
+
+        // 3. Query Incomes
+        $incomes = collect();
+        if ($statementType !== 'expenses') {
+            $incomeQuery = Income::with('category')->where('user_id', $userId);
+
+            if ($startDate && $endDate) {
+                $incomeQuery->whereBetween('income_date', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $incomeQuery->where('income_date', '>=', $startDate);
+            } elseif ($endDate) {
+                $incomeQuery->where('income_date', '<=', $endDate);
+            }
+
+            $incomes = $incomeQuery->orderBy('income_date', 'desc')->get();
+        }
+
+        // 4. Compute Period Totals
         $totalExpense = $expenses->sum('amount');
+        $totalIncome = $incomes->sum('amount');
+        $netSavings = $totalIncome - $totalExpense;
+        $totalCount = $expenses->count() + $incomes->count();
+
+        // 5. Combine into Unified Chronological Transactions Stream
+        $unifiedTransactions = collect();
+
+        foreach ($expenses as $expense) {
+            $unifiedTransactions->push([
+                'id' => 'EXP-' . $expense->id,
+                'raw_date' => $expense->expense_date ? Carbon::parse($expense->expense_date) : null,
+                'date' => $expense->expense_date ? Carbon::parse($expense->expense_date)->format('d-m-Y') : 'N/A',
+                'time' => $expense->expense_date ? Carbon::parse($expense->expense_date)->format('h:i A') : '',
+                'type' => 'expense',
+                'party' => $expense->paid_to ?? 'Expense',
+                'category' => $expense->category->name ?? 'General',
+                'payment_method' => $expense->payment_method ?? 'UPI / Bank',
+                'amount' => (float)$expense->amount,
+                'note' => $expense->note,
+                'transaction_id' => $expense->transaction_id,
+            ]);
+        }
+
+        foreach ($incomes as $income) {
+            $unifiedTransactions->push([
+                'id' => 'INC-' . $income->id,
+                'raw_date' => $income->income_date ? Carbon::parse($income->income_date) : null,
+                'date' => $income->income_date ? Carbon::parse($income->income_date)->format('d-m-Y') : 'N/A',
+                'time' => $income->income_date ? Carbon::parse($income->income_date)->format('h:i A') : '',
+                'type' => 'income',
+                'party' => $income->source ?? 'Earning / Inflow',
+                'category' => $income->category?->name ?? 'Income',
+                'payment_method' => $income->payment_method ?? 'Bank / Transfer',
+                'amount' => (float)$income->amount,
+                'note' => $income->note,
+                'transaction_id' => $income->transaction_id,
+            ]);
+        }
+
+        $transactions = $unifiedTransactions->sortByDesc(function ($item) {
+            return $item['raw_date'] ? $item['raw_date']->timestamp : 0;
+        })->values();
+
+        // High-level benchmark metrics for report footer/summary
         $todayExpense = Expense::where('user_id', $userId)
             ->whereDate('expense_date', Carbon::today())
             ->sum('amount');
-
         $monthlyExpense = Expense::where('user_id', $userId)
             ->whereMonth('expense_date', Carbon::now()->month)
             ->whereYear('expense_date', Carbon::now()->year)
             ->sum('amount');
-
         $yearlyExpense = Expense::where('user_id', $userId)
             ->whereYear('expense_date', Carbon::now()->year)
             ->sum('amount');
 
         $pdf = Pdf::loadView('expenses.pdf', compact(
             'user',
+            'transactions',
             'expenses',
+            'incomes',
             'totalExpense',
+            'totalIncome',
+            'netSavings',
+            'totalCount',
+            'dateRangeText',
+            'statementType',
             'todayExpense',
             'monthlyExpense',
             'yearlyExpense',
-            'dateRangeText'
+            'startDate',
+            'endDate'
         ));
 
-        return $pdf->download('kharchify-expense-statement-' . now()->format('Y-m-d') . '.pdf');
+        $fileName = 'kharchify-statement-' . $filenameSuffix . '.pdf';
+
+        return $pdf->download($fileName);
     }
 }

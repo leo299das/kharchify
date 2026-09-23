@@ -65,11 +65,12 @@
 
             <!-- PDF Export Button -->
             @if($canPdf)
-            <a href="{{ route('expenses.pdf') }}"
-               class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20">
+            <button type="button"
+                    @click="$dispatch('open-pdf-modal')"
+                    class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 <span>Export PDF</span>
-            </a>
+            </button>
             @else
             <a href="{{ route('plans.show') }}"
                title="Unlock with Basic Plan (₹49)"

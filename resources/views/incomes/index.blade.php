@@ -13,11 +13,19 @@
             <p class="text-xs sm:text-sm text-slate-500 mt-1">Track money coming in from sales, salary, freelance, business, and side hustles.</p>
         </div>
 
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-            <a href="{{ route('expenses.index') }}" class="flex-1 sm:flex-initial px-4 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
+        <div class="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+            @if(Auth::user()->canExportPdf())
+            <button type="button" 
+                    @click="$dispatch('open-pdf-modal')" 
+                    class="flex-1 sm:flex-initial px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition cursor-pointer">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <span>Export PDF</span>
+            </button>
+            @endif
+            <a href="{{ route('expenses.index') }}" class="flex-1 sm:flex-initial px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
                 <span>View Expenses</span>
             </a>
-            <a href="{{ route('incomes.create') }}" class="flex-1 sm:flex-initial px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 active:scale-95 transition shrink-0">
+            <a href="{{ route('incomes.create') }}" class="flex-1 sm:flex-initial px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 active:scale-95 transition shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                 <span>+ Add Income</span>
             </a>
