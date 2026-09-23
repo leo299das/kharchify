@@ -57,10 +57,10 @@ class User extends Authenticatable
                     'Standard Category Management',
                     'Monthly Expense Overview & Totals',
                     'Recent Transaction History',
+                    'Instant Formatted PDF Statements Export',
                     'Responsive Mobile & Desktop Web App',
                 ],
                 'unavailable' => [
-                    'Instant Formatted PDF Statements (Basic ₹49+)',
                     'Higher Transaction Limits (150+/mo)',
                     'Interactive Visual Charts & Trends',
                     'Monthly Spending Budget Alert System',
@@ -69,7 +69,7 @@ class User extends Authenticatable
                 'can_charts' => false,
                 'can_budget' => false,
                 'can_csv' => false,
-                'can_pdf' => false,
+                'can_pdf' => true,
             ],
             self::PLAN_BASIC => [
                 'id' => self::PLAN_BASIC,
@@ -211,7 +211,7 @@ class User extends Authenticatable
 
     public function canExportPdf(): bool
     {
-        return $this->isAdmin() || in_array($this->plan, [self::PLAN_BASIC, self::PLAN_MEDIUM, self::PLAN_PRO]);
+        return true;
     }
 
     public function canExportCsv(): bool

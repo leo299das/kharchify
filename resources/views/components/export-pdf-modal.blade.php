@@ -67,7 +67,10 @@
                 </div>
 
                 <!-- Form -->
-                <form action="{{ route('expenses.pdf') }}" method="GET" class="p-6 space-y-5" target="_blank" @submit="setTimeout(() => { open = false }, 800)">
+                <form action="{{ route('expenses.pdf') }}" 
+                      method="GET" 
+                      class="p-6 space-y-5" 
+                      @submit="setTimeout(() => { open = false; }, 600)">
                     
                     <!-- Date Selection Type Switcher Tabs -->
                     <div>
@@ -96,7 +99,7 @@
 
                     <!-- TAB 1: PRESETS -->
                     <div x-show="activeTab === 'preset'" class="space-y-2">
-                        <input type="hidden" name="preset" :value="activeTab === 'preset' ? selectedPreset : ''">
+                        <input type="hidden" name="preset" :value="activeTab === 'preset' ? selectedPreset : ''" :disabled="activeTab !== 'preset'">
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             <button type="button" 
                                     @click="selectedPreset = 'this_month'"
@@ -164,7 +167,7 @@
                                    :disabled="activeTab !== 'month'"
                                    class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
                             <p class="text-[11px] text-slate-500 mt-2">
-                                💡 Generates an end-to-end statement for all 28-31 days of the chosen month.
+                                💡 Generates an end-to-end statement for all days of the chosen month.
                             </p>
                         </div>
                     </div>
@@ -237,7 +240,7 @@
                             Cancel
                         </button>
                         <button type="submit" 
-                                class="flex-[2] py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2">
+                                class="flex-[2] py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <span>Download PDF Statement</span>
                         </button>
@@ -249,3 +252,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    window.openExportPdfModal = function() {
+        window.dispatchEvent(new CustomEvent('open-pdf-modal'));
+    };
+</script>

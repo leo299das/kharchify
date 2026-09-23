@@ -221,6 +221,7 @@
             @if($canPdf)
             <button type="button" 
                     @click="$dispatch('open-pdf-modal')" 
+                    onclick="window.openExportPdfModal && window.openExportPdfModal()"
                     class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                 <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 <span>Export PDF</span>

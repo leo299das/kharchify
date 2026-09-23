@@ -15,7 +15,7 @@ class ExpensePdfTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_free_plan_user_is_redirected_when_downloading_pdf(): void
+    public function test_free_plan_user_can_download_pdf(): void
     {
         $user = User::factory()->create([
             'plan' => User::PLAN_FREE,
@@ -24,8 +24,8 @@ class ExpensePdfTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('expenses.pdf'));
 
-        $response->assertRedirect(route('plans.show'));
-        $response->assertSessionHas('error');
+        $response->assertStatus(200);
+        $response->assertHeader('content-type', 'application/pdf');
     }
 
     public function test_basic_plan_user_can_download_pdf(): void

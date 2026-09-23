@@ -220,11 +220,6 @@ class ExpenseController extends Controller
     public function downloadPDF(Request $request)
     {
         $user = auth()->user();
-
-        if (!$user->canExportPdf()) {
-            return redirect()->route('plans.show')->with('error', '📄 Formatted PDF Statements require the Basic Plan (₹49/mo) or higher. Upgrade your plan to unlock instant PDF exports!');
-        }
-
         $userId = $user->id;
         $statementType = $request->get('statement_type', 'all'); // 'all', 'expenses', 'incomes'
         $preset = $request->get('preset');
@@ -412,7 +407,9 @@ class ExpenseController extends Controller
             'yearlyExpense',
             'startDate',
             'endDate'
-        ));
+        ))->setPaper('a4', 'portrait')
+          ->setOption('isHtml5ParserEnabled', true)
+          ->setOption('isRemoteEnabled', true);
 
         $fileName = 'kharchify-statement-' . $filenameSuffix . '.pdf';
 
